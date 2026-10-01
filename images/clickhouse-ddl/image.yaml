@@ -1,0 +1,12 @@
+# Per-image contract: the Makefile and both workflows read only this file, so a
+# new image needs nothing outside its own directory.
+name: clickhouse-ddl
+description: ClickHouse OTel schema (DDL) mounted as a read-only image volume at /sql
+platforms:
+  - linux/amd64
+  - linux/arm64
+# true: the PR job builds twice and fails if the two digests differ.
+reproducible: true
+consumers:
+  - repo: duynhlab/homelab
+    path: kubernetes/infra/configs/clickhouse-schema/job.yaml

@@ -1,0 +1,46 @@
+# Pull requests: lint every image.yaml, then build each touched image twice and
+# fail if the digest moves. Nothing is pushed.
+name: pr
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      images: ${{ steps.changed.outputs.images }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Lint image contracts
+        run: make lint
+
+      - name: Touched images
+        id: changed
+        env:
+          BASE: origin/${{ github.base_ref }}
+        run: echo "images=$(scripts/changed-images.sh "${BASE}")" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: changes
+    if: needs.changes.outputs.images != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ${{ fromJSON(needs.changes.outputs.images) }}
+    uses: ./.github/workflows/_build.yml
+    with:
+      image: ${{ matrix.image }}
+      version: 0.0.0-pr${{ github.event.number }}
+      twice: true

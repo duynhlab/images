@@ -1,0 +1,64 @@
+# The one build every caller uses: `make digest` (pinned BuildKit, no time, no
+# attestations in the image), so a PR and a release cannot build differently.
+name: _build
+
+on:
+  workflow_call:
+    inputs:
+      image:
+        type: string
+        required: true
+      version:
+        type: string
+        required: true
+      twice:
+        description: Build again from scratch and fail if the digest changes.
+        type: boolean
+        default: false
+    outputs:
+      reference:
+        description: <registry>/<image>:<version>@sha256:<digest>
+        value: ${{ jobs.build.outputs.reference }}
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      reference: ${{ steps.build.outputs.reference }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Build
+        id: build
+        shell: bash
+        env:
+          IMAGE: ${{ inputs.image }}
+          VERSION: ${{ inputs.version }}
+          TWICE: ${{ inputs.twice }}
+        run: |
+          set -euo pipefail
+          ref=$(make -s digest IMAGE="${IMAGE}" VERSION="${VERSION}")
+          echo "built: ${ref}"
+          if [[ "${TWICE}" == "true" && "$(yq -r .reproducible "images/${IMAGE}/image.yaml")" == "true" ]]; then
+            rm -rf .out
+            docker buildx prune --builder images-reproducible --all --force >/dev/null
+            again=$(make -s digest IMAGE="${IMAGE}" VERSION="${VERSION}")
+            echo "again: ${again}"
+            [[ "${again}" == "${ref}" ]] || { echo "::error::${IMAGE} is not reproducible: ${ref} != ${again}"; exit 1; }
+          fi
+          echo "reference=${ref}" >> "$GITHUB_OUTPUT"
+          echo "### ${IMAGE}" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          echo "${ref}" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Keep the archive for the release job
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: ${{ inputs.image }}-oci
+          path: .out/${{ inputs.image }}.oci.tar
+          retention-days: 1
