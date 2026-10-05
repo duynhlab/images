@@ -26,7 +26,10 @@ until 2026-10-01 as `ghcr.io/duynhlab/homelab/clickhouse-ddl`.
 3. After merge, tag `clickhouse-ddl/vX.Y.Z`. Renovate (or a hand PR) moves the
    homelab pin to the release's `…@sha256:…`.
 
-The DDL itself stays `IF NOT EXISTS` and fresh-only; see below.
+The DDL itself stays `IF NOT EXISTS` and fresh-only; see below. A new index on a
+live table is added by hand (`ALTER TABLE … ADD INDEX`, then `MATERIALIZE
+INDEX`), and must go last in the CREATE so the migrated table's `SHOW CREATE
+TABLE` still matches the file. Since 1.1.0 the DDL needs ClickHouse 26.9+.
 
 ## Why the schema is owned here and not by the exporter
 

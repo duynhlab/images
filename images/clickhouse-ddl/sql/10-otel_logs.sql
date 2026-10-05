@@ -4,6 +4,12 @@
 -- the cluster. The __otel_materialized_* columns are
 -- MATERIALIZED, so they are absent from the INSERT surface but queried by
 -- dashboards — dropping them would break those silently.
+-- idx_log_attr_kv is ours, not the exporter's: a keyValuePairs text index that
+-- answers LogAttributes['k'] = 'v' from one index (the key and value indexes
+-- above cannot tell which key a value sat under). Only `=` on a map element is
+-- served; !=, IN and LIKE are not. It needs server 26.9+: 26.8 rejects the
+-- tokenizer. It is the last INDEX line because ALTER TABLE ADD INDEX appends,
+-- so a cluster migrated by hand prints the same SHOW CREATE TABLE.
 CREATE TABLE IF NOT EXISTS otel.otel_logs
 (
     `Timestamp` DateTime64(9) COMMENT 'Event timestamp with nanosecond precision' CODEC(Delta(8), ZSTD(1)),
@@ -37,7 +43,8 @@ CREATE TABLE IF NOT EXISTS otel.otel_logs
     INDEX idx_scope_attr_value mapValues(ScopeAttributes) TYPE text(tokenizer = 'array') GRANULARITY 100000000,
     INDEX idx_log_attr_key mapKeys(LogAttributes) TYPE text(tokenizer = 'array') GRANULARITY 100000000,
     INDEX idx_log_attr_value mapValues(LogAttributes) TYPE text(tokenizer = 'array') GRANULARITY 100000000,
-    INDEX idx_lower_body lower(Body) TYPE text(tokenizer = 'splitByNonAlpha') GRANULARITY 100000000
+    INDEX idx_lower_body lower(Body) TYPE text(tokenizer = 'splitByNonAlpha') GRANULARITY 100000000,
+    INDEX idx_log_attr_kv LogAttributes TYPE text(tokenizer = 'keyValuePairs') GRANULARITY 100000000
 )
 ENGINE = ReplicatedMergeTree
 PARTITION BY toDate(Timestamp)
