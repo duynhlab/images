@@ -1,0 +1,15 @@
+# Per-image contract: the Makefile and both workflows read only this file, so a
+# new image needs nothing outside its own directory.
+name: pg-stat-ch
+description: pg_stat_ch PostgreSQL 18 extension as a CloudNativePG image-volume extension (/lib, /share/extension)
+platforms:
+  - linux/amd64
+  - linux/arm64
+# true: the PR job builds twice and fails if the two digests differ. The only
+# inputs are checksum-pinned upstream tarballs, so the build is deterministic.
+reproducible: true
+consumers:
+  - repo: duynhlab/homelab
+    path: kubernetes/infra/configs/databases/clusters/product-db/instance.yaml
+  - repo: duynhlab/homelab
+    path: kubernetes/infra/configs/databases/clusters/platform-db/instance.yaml

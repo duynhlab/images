@@ -12,7 +12,7 @@ until 2026-10-01 as `ghcr.io/duynhlab/homelab/clickhouse-ddl`.
 
 | | |
 |---|---|
-| Image | `ghcr.io/duynhlab/images/clickhouse-ddl:X.Y.Z`, `FROM scratch`, the five files under `/sql`, `linux/amd64` + `linux/arm64` |
+| Image | `ghcr.io/duynhlab/images/clickhouse-ddl:X.Y.Z`, `FROM scratch`, the nine files under `/sql` (`otel`: 00–40, `pg_stat_ch`: 05 + 50–80), `linux/amd64` + `linux/arm64` |
 | Released by | tag `clickhouse-ddl/vX.Y.Z` → `release.yml`: push, cosign keyless signature, build provenance, GitHub Release with the pin |
 | Reproducible | same SQL → same digest (two clean builds compared on every PR) |
 | Consumer | homelab `job.yaml` pins `:X.Y.Z@sha256:…`; Renovate proposes new versions and homelab CI verifies the signature |
@@ -80,3 +80,19 @@ round-trip per lookup for no space gain. The MV owns no storage.
 Fresh-only, by decision: the CREATEs are IF NOT EXISTS and never touch a live
 table, and there is no migration path. A cluster built before the tier is
 rebuilt by `make up`, the same rule RFC-0028 set for the replicated rollout.
+Adding a whole new database or table is the one change this rule allows on a
+live cluster: the Job re-runs on the new digest and creates only what is
+missing.
+
+## The pg_stat_ch database (since 1.2.0)
+
+`05-pg_stat_ch_database.sql` and `50`–`80` hold a second Replicated database,
+`pg_stat_ch`, written by the PostgreSQL extension of the same name (the
+[`pg-stat-ch`](../pg-stat-ch/) image, v0.4.0) from the homelab CNPG clusters
+over the native protocol. The same ownership rule applies: the extension's
+`INSERT INTO events_raw (<44 named columns>)` is the contract, so `events_raw`
+keeps upstream's column names and types column for column, while the engine,
+ordering, TTL and storage policy are ours. The three rollups (`query_stats_5m`,
+`db_app_user_1m`, `errors_recent`) are TO-style materialized views feeding
+Replicated target tables, which is why a database that holds one base table
+counts seven objects. Nothing here depends on `otel`.
