@@ -1,5 +1,17 @@
 # clickhouse-ddl changelog
 
+## 1.2.0 — 2026-10-13
+
+- New Replicated database `pg_stat_ch` for the PostgreSQL query-telemetry
+  extension of the same name (v0.4.0): `05-pg_stat_ch_database.sql` (per
+  replica, like `00`), `50-pg_stat_ch_events_raw.sql` (upstream's 52-column
+  `events_raw` on `ReplicatedMergeTree`, `ORDER BY (db_name, ts)`, 7 days hot →
+  `cold`, 90 days total) and three TO-style rollups with their target tables:
+  `60` `query_stats_5m` (p50/p95/p99 TDigest states per statement fingerprint),
+  `70` `db_app_user_1m`, `80` `errors_recent` (30 days). Seven objects in the
+  new database; `otel` is untouched. The homelab `clickhouse-schema` Job needs
+  the matching file list and per-database verification.
+
 ## 1.1.0 — 2026-10-05
 
 - `otel_logs` gains `idx_log_attr_kv`, a `keyValuePairs` text index on
