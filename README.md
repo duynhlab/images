@@ -16,7 +16,8 @@ and versioned on its own.
 
 | Image | What it is | Consumer |
 |---|---|---|
-| [`clickhouse-ddl`](images/clickhouse-ddl/) | The ClickHouse OTel schema, mounted read-only at `/sql` as an image volume | homelab `kubernetes/infra/configs/clickhouse-schema/job.yaml` |
+| [`clickhouse-ddl`](images/clickhouse-ddl/) | The ClickHouse schema (`otel` and `pg_stat_ch` databases), mounted read-only at `/sql` as an image volume | homelab `kubernetes/infra/configs/clickhouse-schema/job.yaml` |
+| [`pg-stat-ch`](images/pg-stat-ch/) | The pg_stat_ch PostgreSQL 18 extension as a CloudNativePG image-volume extension (`/lib`, `/share/extension`) | homelab `product-db` / `platform-db` `Cluster` manifests |
 | [`postgresql-cron`](images/postgresql-cron/) | CNPG PostgreSQL 18.6 with pg_cron; unreleased qualification candidate | homelab RFC-0030 Phase 0; no deployed consumer |
 
 ## Layout
