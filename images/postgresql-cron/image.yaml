@@ -1,0 +1,13 @@
+# Per-image contract: the Makefile and both workflows read only this file, so a
+# new image needs nothing outside its own directory.
+name: postgresql-cron
+description: CNPG PostgreSQL 18.6 system image with checksum-pinned pg_cron 1.6.8
+platforms:
+  - linux/amd64
+  - linux/arm64
+# true: the PR job builds twice and fails if the two digests differ. The final
+# stage only copies files from checksum-pinned inputs.
+reproducible: true
+consumers:
+  - repo: duynhlab/homelab
+    path: kubernetes/infra/configs/databases/clusters/product-db/instance.yaml
