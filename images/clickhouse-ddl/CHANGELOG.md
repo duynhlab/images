@@ -1,5 +1,16 @@
 # clickhouse-ddl changelog
 
+## 1.2.1 — 2026-10-15
+
+- The three `pg_stat_ch` rollup views (`60`, `70`, `80`) are now created with
+  `DEFINER = default SQL SECURITY DEFINER`. Without a SQL SECURITY clause,
+  ClickHouse checks `SELECT` on `events_raw` against whoever inserts, and the
+  extension's writer holds `INSERT` only, so every batch failed with
+  `Not enough privileges … while pushing to view` and the rollups stayed empty.
+  Found on the homelab Kind audit; the writer stays INSERT-only. Fresh-only as
+  before: a live database gets `ALTER TABLE … MODIFY DEFINER = default SQL
+  SECURITY DEFINER` on each view.
+
 ## 1.2.0 — 2026-10-13
 
 - New Replicated database `pg_stat_ch` for the PostgreSQL query-telemetry

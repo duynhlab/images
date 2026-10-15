@@ -23,7 +23,10 @@ ORDER BY (db_name, ts)
 TTL toDateTime(ts) + toIntervalDay(7) TO VOLUME 'cold', toDateTime(ts) + toIntervalDay(30)
 SETTINGS index_granularity = 8192, ttl_only_drop_parts = 1, storage_policy = 'hot_cold';
 
+-- Runs as `default`: the writer (pg_stat_ch) holds INSERT only, and a view
+-- without SQL SECURITY would check SELECT on events_raw against it.
 CREATE MATERIALIZED VIEW IF NOT EXISTS pg_stat_ch.errors_recent_mv TO pg_stat_ch.errors_recent
+DEFINER = default SQL SECURITY DEFINER
 AS SELECT
     ts,
     db_name,
