@@ -19,7 +19,10 @@ ORDER BY (db_name, bucket, app, db_user, db_operation)
 TTL bucket + toIntervalDay(30) TO VOLUME 'cold', bucket + toIntervalDay(90)
 SETTINGS index_granularity = 8192, ttl_only_drop_parts = 1, storage_policy = 'hot_cold';
 
+-- Runs as `default`: the writer (pg_stat_ch) holds INSERT only, and a view
+-- without SQL SECURITY would check SELECT on events_raw against it.
 CREATE MATERIALIZED VIEW IF NOT EXISTS pg_stat_ch.db_app_user_1m_mv TO pg_stat_ch.db_app_user_1m
+DEFINER = default SQL SECURITY DEFINER
 AS SELECT
     toStartOfMinute(toDateTime(ts)) AS bucket,
     db_name,
