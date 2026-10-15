@@ -19,31 +19,6 @@ and versioned on its own.
 | [`clickhouse-ddl`](images/clickhouse-ddl/) | The ClickHouse schema (`otel` and `pg_stat_ch` databases), mounted read-only at `/sql` as an image volume | homelab `kubernetes/infra/configs/clickhouse-schema/job.yaml` |
 | [`pg-stat-ch`](images/pg-stat-ch/) | The pg_stat_ch PostgreSQL 18 extension as a CloudNativePG image-volume extension (`/lib`, `/share/extension`) | homelab `product-db` / `platform-db` `Cluster` manifests |
 
-## Layout
-
-```text
-images/<image>/
-  image.yaml      # the contract: name, description, platforms, reproducible, consumers
-  Dockerfile      # build context is this directory
-  README.md       # what it is, who uses it, how to change it
-  CHANGELOG.md    # this image's releases
-Makefile          # build | digest | load | lint, all taking IMAGE=<image>
-scripts/          # changed-images.sh (PR matrix)
-.github/workflows # pr.yml, release.yml, _build.yml (the one shared build)
-```
-
-## Workflow
-
-```mermaid
-flowchart LR
-  pr["Pull request"] --> lint["make lint<br/>every image.yaml"]
-  pr --> matrix["changed images"] --> twice["build twice<br/>digests must match"]
-  tag["tag image/vX.Y.Z"] --> build["_build.yml<br/>make digest"]
-  build --> push["skopeo push<br/>preserve digest"] --> check["registry digest<br/>== built digest"]
-  check --> sign["cosign sign<br/>keyless"] --> attest["build provenance"] --> rel["GitHub Release<br/>reference to pin"]
-  rel -. "Renovate PR" .-> consumer["consumer repo pin"]
-```
-
 ## Add an image
 
 1. Create `images/<image>/` with `image.yaml`, `Dockerfile`, `README.md` and
