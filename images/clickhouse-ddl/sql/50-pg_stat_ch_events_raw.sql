@@ -12,6 +12,11 @@
 -- filled by the extension's Arrow/OTel path; the native path leaves them at
 -- their defaults. db_name is what tells the two CNPG clusters apart on this
 -- platform, because every database name is unique across them.
+--
+-- The extension inserts the client's application_name as `app`. That column is
+-- EPHEMERAL: it is accepted on INSERT but never stored, and its value is
+-- stored as `application_name` through the DEFAULT. Query `application_name`;
+-- `app` cannot be selected.
 CREATE TABLE IF NOT EXISTS pg_stat_ch.events_raw
 (
     `ts` DateTime64(6, 'UTC') COMMENT 'Statement start time' CODEC(Delta(8), ZSTD(1)),
@@ -55,7 +60,8 @@ CREATE TABLE IF NOT EXISTS pg_stat_ch.events_raw
     `err_sqlstate` LowCardinality(String) COMMENT 'SQLSTATE when the statement raised; empty otherwise',
     `err_elevel` UInt8 COMMENT 'PostgreSQL elevel; 0 = no error, 21 = ERROR',
     `err_message` String COMMENT 'Error text, truncated at 2 KB' CODEC(ZSTD(1)),
-    `app` LowCardinality(String) COMMENT 'application_name',
+    `app` String EPHEMERAL COMMENT 'Insert-only: the extension writes application_name under this name',
+    `application_name` LowCardinality(String) DEFAULT app COMMENT 'Client application_name',
     `client_addr` String COMMENT 'Client address; the pooler for pooled sessions',
     `instance_ubid` String DEFAULT '' COMMENT 'Arrow/OTel path only',
     `server_ubid` String DEFAULT '' COMMENT 'Arrow/OTel path only',
