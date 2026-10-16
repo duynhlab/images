@@ -92,7 +92,9 @@ missing.
 over the native protocol. The same ownership rule applies: the extension's
 `INSERT INTO events_raw (<44 named columns>)` is the contract, so `events_raw`
 keeps upstream's column names and types column for column, while the engine,
-ordering, TTL and storage policy are ours. The three rollups (`query_stats_5m`,
+ordering, TTL and storage policy are ours. The one exception (since 2.0.0) is
+`app`: it is an `EPHEMERAL` column, so the extension still inserts it, but the
+value is stored as `application_name` and the rollups use that name. The three rollups (`query_stats_5m`,
 `db_app_user_1m`, `errors_recent`) are TO-style materialized views feeding
 Replicated target tables, which is why a database that holds one base table
 counts seven objects. Nothing here depends on `otel`.

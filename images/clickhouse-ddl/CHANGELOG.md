@@ -1,5 +1,17 @@
 # clickhouse-ddl changelog
 
+## 2.0.0 — 2026-10-16
+
+- **Breaking:** the client's `application_name` is now stored and queried as
+  `application_name` instead of upstream's `app`. In `events_raw`, `app`
+  becomes an `EPHEMERAL` column (the extension still inserts it by name; it is
+  never stored and cannot be selected) and `application_name` takes its value
+  through `DEFAULT app`. `db_app_user_1m` (including its `ORDER BY`) and
+  `errors_recent` name the column `application_name`, and their views read it.
+  Verified on `clickhouse-server:26.9`: a named-column insert that includes
+  `app` fills `application_name` in `events_raw` and in both rollups. Every
+  query that reads `app` must change. Fresh-only, with no migration.
+
 ## 1.2.1 — 2026-10-15
 
 - The three `pg_stat_ch` rollup views (`60`, `70`, `80`) are now created with
