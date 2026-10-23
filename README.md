@@ -18,6 +18,7 @@ and versioned on its own.
 |---|---|---|
 | [`clickhouse-ddl`](images/clickhouse-ddl/) | The ClickHouse schema (`otel` and `pg_stat_ch` databases), mounted read-only at `/sql` as an image volume | homelab `kubernetes/infra/configs/clickhouse-schema/job.yaml` |
 | [`pg-stat-ch`](images/pg-stat-ch/) | The pg_stat_ch PostgreSQL 18 extension as a CloudNativePG image-volume extension (`/lib`, `/share/extension`) | homelab `product-db` / `platform-db` `Cluster` manifests |
+| [`postgresql-cron`](images/postgresql-cron/) | CNPG PostgreSQL 18.6 operand with pg_cron 1.6.8 for the CDC heartbeats | homelab `product-db` `Cluster` manifest |
 
 ## Add an image
 
