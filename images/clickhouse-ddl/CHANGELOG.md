@@ -1,5 +1,11 @@
 # clickhouse-ddl changelog
 
+## 2.1.0 — 2026-10-23
+
+- Add `06-analytics_database.sql`: the Replicated `analytics` database for the
+  RFC-0030 commerce read model, applied to every replica. No table DDL — the
+  CDC tables are created by PeerDB.
+
 ## 2.0.0 — 2026-10-16
 
 - **Breaking:** the client's `application_name` is now stored and queried as

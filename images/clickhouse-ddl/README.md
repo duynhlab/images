@@ -98,3 +98,13 @@ value is stored as `application_name` and the rollups use that name. The three r
 `db_app_user_1m`, `errors_recent`) are TO-style materialized views feeding
 Replicated target tables, which is why a database that holds one base table
 counts seven objects. Nothing here depends on `otel`.
+
+## The analytics database (since 2.1.0)
+
+`06-analytics_database.sql` creates a third Replicated database, `analytics`,
+for the homelab commerce read model (RFC-0030). Unlike `otel` and
+`pg_stat_ch`, this image ships **no table DDL** for it: PeerDB's mirrors create
+the raw tables as `analytics_ingest` (`ReplicatedReplacingMergeTree`), and the
+serving `*_live` views are created after them. The image only guarantees the
+database exists, Replicated, on every replica before the first mirror starts.
+
