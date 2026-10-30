@@ -23,6 +23,14 @@ Most agent tasks in this repository are image changes. For these tasks:
 
 Ask the user for clarification only when the intended image, behavior, or compatibility impact cannot be inferred from the request and local context.
 
+## Add an image
+
+1. Create `images/<image>/` with `image.yaml`, `Dockerfile`, `README.md`, and `CHANGELOG.md`. Keep `name` equal to the directory.
+2. Run `make lint && make digest IMAGE=<image>`; set `reproducible: true` only if two clean builds give the same digest.
+3. Open a pull request. CI lints all contracts and builds the touched images twice.
+4. After merge, push the tag `<image>/v0.1.0`.
+5. First release only: make the package public in GitHub under Packages → `images/<image>` → Package settings → Change visibility. A new GHCR package is private by default and does not inherit the repository's visibility. Kind and other anonymous pulls fail until this is done, and public cannot be undone.
+
 ## Build and PR workflow
 
 - Add an image by creating a new folder under `images/<image>/`; do not add image-specific logic into the root `Makefile` or workflow files.
