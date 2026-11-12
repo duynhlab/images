@@ -1,5 +1,11 @@
 # pg-stat-ch changelog
 
+## 0.2.1 — 2026-11-12
+
+- pg_stat_ch v0.4.2: internal changes only. The worker appends events straight
+  to the export sink instead of copying them through a dequeue buffer, and DSA
+  strings drop their headers. GUCs and the extension SQL (0.4) are unchanged.
+
 ## 0.2.0 — 2026-11-10
 
 - pg_stat_ch v0.4.1. Fixes a double free when an interrupted dequeue is
