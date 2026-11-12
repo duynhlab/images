@@ -8,7 +8,7 @@ CloudNativePG image-volume extension: PostgreSQL mounts it read-only at
 
 | Quick facts | |
 |---|---|
-| Upstream | `ClickHouse/pg_stat_ch` v0.4.1 release tarballs (`pg18-linux-{amd64,arm64}`), checksum-pinned |
+| Upstream | `ClickHouse/pg_stat_ch` v0.4.2 release tarballs (`pg18-linux-{amd64,arm64}`), checksum-pinned |
 | Operand it is built against | `ghcr.io/cloudnative-pg/postgresql:18.6-system-trixie` (digest in the Dockerfile) |
 | Layout | `/lib/pg_stat_ch.so`, `/share/extension/pg_stat_ch.control` + upgrade scripts |
 | Runtime libraries | `libstdc++.so.6`, `libssl.so.3`, `libcrypto.so.3`, glibc ≥ 2.34 — all in the `system` operand, verified by `ldd` at build time |
